@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NissanConnect | Vehicle Hotspot Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --nissan-red: #e31937;
+            --nissan-red-dark: #c3002f;
+            --nissan-black: #0a0a0a;
+            --nissan-dark: #1a1a1a;
+            --nissan-gray: #2d2d2d;
+            --nissan-light: #f5f5f5;
+            --tech-blue: #00a8ff;
+            --tech-purple: #9c27b0;
+            --tech-cyan: #00d4ff;
+            
+            --bg-color: var(--nissan-black);
+            --surface-color: var(--nissan-dark);
+            --surface-secondary: var(--nissan-gray);
+            --text-primary: #ffffff;
+            --text-secondary: #dddddd;
+            --text-tertiary: #aaaaaa;
+            --accent-color: var(--nissan-red);
+            --border-color: #333;
+            --header-bg: rgba(10, 10, 10, 0.9);
+            --card-bg: rgba(26, 26, 26, 0.8);
+            --shadow-color: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c0c1d 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Background Effects */
+        .city-skyline {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%); /* FIX 1: Removed extra comma */
+            z-index: -2;
+            opacity: 0.8;
+        }
+
+        .car-outline {
+            position: absolute;
+            bottom: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            max-width: 700px;
+            height: 200px;
+            z-index: -1;
+            opacity: 0.7;
+        }
+
+        .car-outline::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 200"><path d="M50,150 Q100,100 150,150 L200,150 Q250,100 300,150 L400,150 Q450,100 500,150 L550,150 Q600,100 650,150 L650,170 L50,170 Z" fill="none" stroke="%2300a8ff" stroke-width="3" stroke-dasharray="10,5"/><circle cx="150" cy="170" r="20" fill="none" stroke="%2300a8ff" stroke-width="2"/><circle cx="550" cy="170" r="20" fill="none" stroke="%2300a8ff" stroke-width="2"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            filter: drop-shadow(0 0 10px var(--tech-blue));
+        }
+
+        .glowing-dots {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -3;
+            overflow: hidden;
+        }
+
+        .glowing-dot {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(5px);
+            animation: float 15s infinite linear;
+            opacity: 0.3;
+        }
+
+        .glowing-dot:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, var(--tech-cyan) 0%, transparent 70%);
+            animation-duration: 20s;
+        }
+
+        .glowing-dot:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            width: 50px;
+            height: 50px;
+            background: radial-gradient(circle, var(--tech-purple) 0%, transparent 70%);
+            animation-duration: 25s;
+            animation-delay: 3s;
+        }
+
+        .glowing-dot:nth-child(3) {
+            top: 40%;
+            left: 30%;
+            width: 70px;
+            height: 70px;
+            background: radial-gradient(circle, var(--accent-color) 0%, transparent 70%);
+            animation-duration: 18s;
+            animation-delay: 7s;
+        }
+
+        .glowing-dot:nth-child(4) {
+            top: 70%;
+            left: 20%;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, var(--tech-blue) 0%, transparent 70%);
+            animation-duration: 22s;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, 15px) rotate(5deg); }
+            50% { transform: translate(10px, 30px) rotate(0deg); }
+            75% { transform: translate(-10px, 20px) rotate(-5deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 500px;
+            width: 90%;
+            margin: auto;
+            padding: 30px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 30px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Fixed logo size */
+        .nissan-logo {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
+            filter: drop-shadow(0 0 15px rgba(227, 25, 55, 0.5));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(26, 26, 26, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            animation: logo-pulse 2s infinite alternate;
+        }
+
+        .nissan-logo img {
+            max-width: 2rem; /* FIX 2: Corrected CSS property */
+        }
+
+        @keyframes logo-pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, #fff, var(--tech-cyan));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 212, 255, 0.2);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            font-weight: 300;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Connection Info */
+        .connection-info {
+            background: rgba(20, 20, 40, 0.7);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            backdrop-filter: blur(10px);
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .connection-details {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .connection-detail {
+            flex: 1;
+            min-width: 150px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .detail-label {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            margin-bottom: 5px;
+        }
+        
+        .detail-value {
+            font-size: 1.1rem;
+            color: var(--tech-cyan);
+            font-weight: 500;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: rgba(30, 30, 50, 0.6);
+            border: 1px solid rgba(0, 168, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--tech-cyan);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        
+        .signal-strength {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .signal-bars {
+            display: flex;
+            align-items: flex-end;
+            height: 30px;
+            margin-right: 10px;
+        }
+        
+        .signal-bar {
+            width: 8px;
+            margin: 0 2px;
+            background: var(--tech-cyan);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        
+        .signal-bar:nth-child(1) { height: 8px; }
+        .signal-bar:nth-child(2) { height: 12px; }
+        .signal-bar:nth-child(3) { height: 16px; }
+        .signal-bar:nth-child(4) { height: 20px; }
+        .signal-bar:nth-child(5) { height: 24px; }
+        
+        .signal-text {
+            font-size: 0.9rem;
+            color: var(--tech-cyan);
+        }
+        
+        .device-count {
+            display: inline-block;
+            background: rgba(0, 168, 255, 0.2);
+            border-radius: 20px;
+            padding: 8px 15px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Connection Section */
+        .connect-container {
+            position: relative;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .connect-btn {
+            background: linear-gradient(135deg, var(--tech-blue) 0%, var(--tech-purple) 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 168, 255, 0.5);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin: 20px 0;
+            font-family: 'Orbitron', sans-serif;
+            width: 100%;
+            max-width: 380px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 168, 255, 0.7);
+            background: linear-gradient(135deg, var(--tech-purple) 0%, var(--tech-blue) 100%);
+        }
+
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+
+        .connect-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(30deg);
+            transition: all 0.6s ease;
+        }
+
+        .connect-btn:hover::after {
+            transform: rotate(30deg) translate(20%, 20%);
+        }
+
+        .connection-status {
+            margin-top: 25px;
+            font-size: 1.2rem;
+            min-height: 35px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .status-connected {
+            color: #4CAF50;
+        }
+
+        .status-connecting {
+            color: var(--tech-cyan);
+        }
+
+        .connection-animation {
+            display: none;
+            margin: 30px auto;
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+
+        .connection-dot {
+            width: 20px;
+            height: 20px;
+            background: var(--tech-cyan);
+            border-radius: 50%;
+            position: absolute;
+            animation: pulse 1.5s infinite ease-in-out;
+            box-shadow: 0 0 10px var(--tech-cyan);
+        }
+
+        .connection-dot:nth-child(1) { top: 0; left: 40px; animation-delay: 0s; }
+        .connection-dot:nth-child(2) { top: 40px; right: 0; animation-delay: 0.2s; }
+        .connection-dot:nth-child(3) { bottom: 0; left: 40px; animation-delay: 0.4s; }
+        .connection-dot:nth-child(4) { top: 40px; left: 0; animation-delay: 0.6s; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(0.8); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* Terms Section */
+        .terms-accept {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 25px 0;
+        }
+        
+        .terms-accept input {
+            margin-right: 12px;
+        }
+        
+        .terms-accept label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            text-align: left;
+            max-width: 400px;
+        }
+        
+        .terms-accept a {
+            color: var(--tech-cyan);
+            text-decoration: none;
+        }
+        
+        .terms-accept a:hover {
+            text-decoration: underline;
+        }
+        
+        .terms {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            line-height: 1.7;
+            color: var(--text-tertiary);
+            padding: 15px;
+            background: rgba(20, 20, 40, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 168, 255, 0.1);
+            backdrop-filter: blur(5px);
+            margin-top: 10px;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .terms a {
+            color: var(--tech-cyan);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .terms a:hover {
+            text-decoration: underline;
+            text-shadow: 0 0 5px rgba(0, 212, 255, 0.5);
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            0% { opacity: 0; transform: translateY(-30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes fadeInUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.7); }
+            50% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.9); }
+            100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.7); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.9rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .connect-btn {
+                padding: 16px 30px;
+                font-size: 1.1rem;
+            }
+
+            .car-outline {
+                bottom: 10rem;
+                height: 10rem;
+                /* FIX 4: Removed object-fit property */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin-top: 0;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            .subtitle {
+                font-size: 0.95rem;
+            }
+            
+            .connect-btn {
+                width: 100%;
+                padding: 14px;
+                font-size: 1rem;
+            }
+            
+            .connection-detail {
+                min-width: 100%;
+            }
+            
+            .car-outline {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Elements -->
+    <div class="glowing-dots">
+        <div class="glowing-dot"></div>
+        <div class="glowing-dot"></div>
+        <div class="glowing-dot"></div>
+        <div class="glowing-dot"></div>
+    </div>
+    <div class="city-skyline"></div>
+    <div class="car-outline"></div>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <div class="nissan-logo">
+            <!-- FIX 3: Removed extra closing tag and invalid attributes -->
+            <img src="images/nissanlogo.png" alt="Nissan Logo" style="max-width: 100%; max-height: 100%;">
+        </div>
+        
+        <h1>NISSANCONNECT HOTSPOT</h1>
+        <p class="subtitle">Connect to your Nissan's Wi-Fi hotspot to enjoy internet access on the go</p>
+        
+        <!-- Connection Info -->
+        <div class="connection-info">
+            <h3><i class="fas fa-wifi"></i> Vehicle Hotspot Details</h3>
+            
+            <div class="connection-details">
+                <div class="connection-detail">
+                    <div class="detail-label">wIfi Name</div>
+                    <div class="detail-value">NISSAN Guest</div>
+                </div>
+                
+                <div class="connection-detail">
+                    <div class="detail-label">Signal Strength</div>
+                    <div class="signal-strength">
+                        <div class="signal-bars">
+                            <div class="signal-bar"></div>
+                            <div class="signal-bar"></div>
+                            <div class="signal-bar"></div>
+                            <div class="signal-bar"></div>
+                            <div class="signal-bar"></div>
+                        </div>
+                        <div class="signal-text">Excellent</div>
+                    </div>
+                </div>
+                
+                <div class="connection-detail">
+                    <div class="detail-label">Connected Devices</div>
+                    <div class="detail-value">1/50</div>
+                </div>
+            </div>
+        
+        <!-- Connection Section -->
+        <div class="connect-container">
+            <div class="terms-accept">
+                <input type="checkbox" id="termsCheckbox">
+                <label for="termsCheckbox">I agree to the <a href="#" onclick="showTerms()">Terms of Service</a> and <a href="#" onclick="showPrivacy()">Privacy Policy</a></label>
+            </div>
+            
+            <button class="connect-btn" id="connectButton" onclick="connectToInternet()">
+                <i class="fas fa-wifi"></i> CONNECT TO INTERNET
+            </button>
+            
+            <div class="connection-animation" id="connectionAnimation">
+                <div class="connection-dot"></div>
+                <div class="connection-dot"></div>
+                <div class="connection-dot"></div>
+                <div class="connection-dot"></div>
+            </div>
+            
+            <div class="connection-status" id="connectionStatus"></div>
+            
+            <div class="terms">
+                <small>NissanConnect Hotspot provides internet access through your vehicle's built-in modem. Data usage applies according to your subscription plan. Service requires cellular coverage.</small>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Connect to internet function
+        function connectToInternet() {
+            const btn = document.getElementById('connectButton');
+            const status = document.getElementById('connectionStatus');
+            const animation = document.getElementById('connectionAnimation');
+            const termsCheckbox = document.getElementById('termsCheckbox');
+            
+            if (!termsCheckbox.checked) {
+                status.textContent = 'Please accept the Terms of Service to continue.';
+                status.className = 'connection-status';
+                status.style.opacity = '1';
+                
+                // Add shake animation to terms section
+                const termsContainer = document.querySelector('.terms-accept');
+                termsContainer.style.animation = 'shake 0.5s';
+                setTimeout(() => termsContainer.style.animation = '', 500);
+                return;
+            }
+            
+            // Show connecting state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> CONNECTING...';
+            animation.style.display = 'block';
+            status.textContent = 'Establishing secure connection...';
+            status.className = 'connection-status status-connecting';
+            status.style.opacity = '1';
+            
+            // Simulate connection process
+            setTimeout(() => {
+                // Success state
+                animation.style.display = 'none';
+                status.textContent = 'Connected! Enjoy your internet access.';
+                status.className = 'connection-status status-connected';
+                
+                btn.innerHTML = '<i class="fas fa-check"></i> CONNECTED';
+                btn.style.background = 'linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%)';
+                btn.style.boxShadow = '0 10px 25px rgba(46, 125, 50, 0.5)';
+                
+                // Simulate redirect to Nissan's site after 3 seconds
+                setTimeout(() => {
+                    window.location.href = "https://www.nissanusa.com";
+                }, 3000);
+            }, 3000);
+        }
+        
+        function showTerms() {
+            alert("NissanConnect Hotspot Terms of Service:\n\n1. Service Availability: Hotspot requires cellular coverage and active subscription.\n2. Data Usage: Your data plan applies to all usage through this connection.\n3. Acceptable Use: You agree not to use the service for illegal activities.\n4. Network Management: Nissan may manage network traffic to ensure quality service.");
+            return false;
+        }
+        
+        function showPrivacy() {
+            alert("Privacy Policy:\n\nNissan respects your privacy. We collect minimal connection data for service improvement and billing purposes. Personal browsing data is not monitored or stored. You are responsible for the security of your connected devices.");
+            return false;
+        }
+        
+        // Add animations on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add shake animation for error state
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Simulate signal strength animation
+            const signalBars = document.querySelectorAll('.signal-bar');
+            setInterval(() => {
+                signalBars.forEach((bar, index) => {
+                    if (index < 4) { // Skip the last bar to show variation
+                        const rand = Math.random();
+                        bar.style.opacity = rand > 0.2 ? 1 : 0.7;
+                    }
+                });
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
